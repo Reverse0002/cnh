@@ -76,6 +76,26 @@
         .btn-gov:hover { background-color: var(--gov-blue-d); transform: translateY(-1px); }
         .btn-center { display: flex; justify-content: center; margin-top: 20px; }
 
+        .copy-btn {
+            background: transparent;
+            border: 1px solid var(--gov-blue-p);
+            color: var(--gov-blue-p);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 10px;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(19, 81, 180, 0.08);
+            transform: translateY(-1px);
+        }
+
         /* LOADING SERPRO STYLE */
         .loading-step { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid #eee; font-size: 15px; color: #555; }
         .spinner { color: var(--gov-blue-p); animation: spin 1s linear infinite; }
@@ -260,8 +280,11 @@
                 <div>
                     <h2 style="margin: 0; color: var(--gov-green);">CIDADÃO APTO!</h2>
                     <p style="margin: 10px 0;">Seu cadastro foi aprovado com sucesso. Você está isento das taxas de CFC (Autoescola).</p>
-                    <p style="font-size: 14px; background: #eee; padding: 5px 10px; display: inline-block; border-radius: 4px;">
+                    <p style="font-size: 14px; background: #eee; padding: 5px 10px; display: inline-flex; align-items: center; border-radius: 4px; gap: 10px;">
                         <strong>Protocolo:</strong> <span id="protocolo"></span>
+                        <button type="button" class="copy-btn" onclick="copiarProtocolo()">
+                            <i class="fas fa-copy"></i> Copiar
+                        </button>
                     </p>
                 </div>
             </div>
@@ -463,6 +486,33 @@
                 document.getElementById('step-2').classList.add('hidden');
                 document.getElementById('step-3').classList.remove('hidden');
             }, delay + 500);
+        }
+
+        function copiarProtocolo() {
+            const protocolo = document.getElementById('protocolo').innerText.trim();
+
+            if (!protocolo) {
+                alert("O protocolo ainda não foi gerado.");
+                return;
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(protocolo)
+                    .then(() => alert("Protocolo copiado para a área de transferência."))
+                    .catch(() => copiarProtocoloFallback(protocolo));
+            } else {
+                copiarProtocoloFallback(protocolo);
+            }
+        }
+
+        function copiarProtocoloFallback(texto) {
+            const area = document.createElement('textarea');
+            area.value = texto;
+            document.body.appendChild(area);
+            area.select();
+            document.execCommand('copy');
+            document.body.removeChild(area);
+            alert("Protocolo copiado para a área de transferência.");
         }
 
         function simularUpload() {
