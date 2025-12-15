@@ -185,7 +185,8 @@
 
                 <div class="input-group">
                     <label>CEP (Busca Automática)</label>
-                    <input type="text" id="cep" maxlength="9" onblur="buscarCEP(this.value)" placeholder="00000-000">
+                    <input type="text" id="cep" maxlength="9" oninput="mascaraCEP(this)" placeholder="00000-000" aria-describedby="cep-ajuda">
+                    <small id="cep-ajuda" style="color:#555;">Preencha o CEP e buscaremos o endereço automaticamente.</small>
                 </div>
 
                 <div class="input-group">
@@ -195,7 +196,8 @@
 
                 <div class="input-group full-width">
                     <label>Endereço / Logradouro</label>
-                    <input type="text" id="endereco" readonly>
+                    <input type="text" id="endereco" placeholder="O logradouro será preenchido pelo CEP" aria-describedby="endereco-status">
+                    <small id="endereco-status" style="color:#777;"></small>
                 </div>
 
                 <div class="input-group">
@@ -239,10 +241,25 @@
             <h1 class="card-title">Validação Biométrica Obrigatória</h1>
             <p class="card-subtitle">Para concluir a abertura do processo, anexe uma foto legível do seu documento de identificação (RG ou Carteira de Trabalho).</p>
 
-            <div class="upload-container" onclick="simularUpload()">
+            <div class="upload-container" onclick="document.getElementById('doc-frente').focus()">
                 <i class="fas fa-id-card" style="font-size: 48px; color: var(--gov-blue-p); margin-bottom: 20px;"></i>
-                <h3 style="margin: 0; color: #333;">Clique para anexar documento (Frente e Verso)</h3>
-                <p style="font-size: 13px; color: #666; margin-top: 10px;">O sistema fará o reconhecimento automático (OCR).</p>
+                <h3 style="margin: 0; color: #333;">Anexar documento com clareza (Frente e Verso)</h3>
+                <p style="font-size: 13px; color: #666; margin-top: 10px;">Use arquivos legíveis em JPG ou PNG para acelerar a validação.</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px;text-align:left;">
+                    <label style="font-weight:600;display:flex;flex-direction:column;gap:6px;">
+                        Frente do documento
+                        <input type="file" id="doc-frente" accept="image/*" onchange="manipularUpload()" style="padding:10px;border:1px solid #888;border-radius:6px;">
+                    </label>
+                    <label style="font-weight:600;display:flex;flex-direction:column;gap:6px;">
+                        Verso do documento
+                        <input type="file" id="doc-verso" accept="image/*" onchange="manipularUpload()" style="padding:10px;border:1px solid #888;border-radius:6px;">
+                    </label>
+                    <label style="font-weight:600;display:flex;flex-direction:column;gap:6px;">
+                        Documento em mãos
+                        <input type="file" id="doc-selfie" accept="image/*" onchange="manipularUpload()" style="padding:10px;border:1px solid #888;border-radius:6px;">
+                    </label>
+                </div>
+                <button class="btn-gov" style="margin-top:18px;" type="button" onclick="manipularUpload(event)"><i class="fas fa-upload"></i> Enviar arquivos</button>
             </div>
 
             <div id="upload-progress" class="hidden" style="margin-top: 20px;">
@@ -404,25 +421,53 @@
             i.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14);
         }
 
+        function mascaraCEP(input) {
+            const cleaned = input.value.replace(/\D/g, "").slice(0, 8);
+            if (cleaned.length > 5) {
+                input.value = cleaned.replace(/(\d{5})(\d{0,3})/, "$1-$2");
+            } else {
+                input.value = cleaned;
+            }
+
+            if (cleaned.length === 8) {
+                buscarCEP(cleaned);
+            } else {
+                atualizarStatusEndereco("", false);
+            }
+        }
+
+        function atualizarStatusEndereco(msg, erro) {
+            const status = document.getElementById('endereco-status');
+            status.textContent = msg;
+            status.style.color = erro ? '#b71c1c' : '#555';
+        }
+
         // --- INTEGRAÇÃO VIACEP ---
         function buscarCEP(cep) {
-            cep = cep.replace(/\D/g, '');
-            if (cep.length === 8) {
-                document.getElementById('endereco').value = "Buscando...";
-                fetch(`https://viacep.com.br/ws/${cep}/json/`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (!data.erro) {
-                            document.getElementById('endereco').value = data.logradouro;
-                            document.getElementById('bairro').value = data.bairro;
-                            document.getElementById('cidade').value = `${data.localidade} - ${data.uf}`;
-                            document.getElementById('numero').focus();
-                        } else {
-                            alert("CEP não encontrado.");
-                            document.getElementById('endereco').value = "";
-                        }
-                    });
-            }
+            atualizarStatusEndereco("Consultando CEP na base dos Correios...", false);
+            document.getElementById('endereco').value = "Buscando...";
+            document.getElementById('bairro').value = "";
+            document.getElementById('cidade').value = "";
+
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.erro) {
+                        document.getElementById('endereco').value = data.logradouro;
+                        document.getElementById('bairro').value = data.bairro;
+                        document.getElementById('cidade').value = `${data.localidade} - ${data.uf}`;
+                        atualizarStatusEndereco("Endereço localizado. Confira o número e complemento.", false);
+                        document.getElementById('numero').focus();
+                    } else {
+                        atualizarStatusEndereco("CEP não encontrado. Confira o número digitado.", true);
+                        document.getElementById('endereco').value = "";
+                        document.getElementById('cep').focus();
+                    }
+                })
+                .catch(() => {
+                    atualizarStatusEndereco("Não foi possível consultar o CEP agora. Tente novamente.", true);
+                    document.getElementById('endereco').value = "";
+                });
         }
 
         // --- NAVEGAÇÃO ENTRE ETAPAS ---
@@ -465,7 +510,19 @@
             }, delay + 500);
         }
 
-        function simularUpload() {
+        function manipularUpload(event) {
+            if (event) event.stopPropagation();
+            const frente = document.getElementById('doc-frente').files.length;
+            const verso = document.getElementById('doc-verso').files.length;
+            const selfie = document.getElementById('doc-selfie').files.length;
+
+            if (!frente || !verso || !selfie) {
+                atualizarStatusEndereco("", false);
+                document.getElementById('upload-progress').classList.add('hidden');
+                alert("Envie os três arquivos: frente, verso e documento em mãos para continuar.");
+                return;
+            }
+
             document.getElementById('upload-progress').classList.remove('hidden');
             let width = 0;
             let bar = document.getElementById('p-bar');
@@ -474,22 +531,22 @@
             let inv = setInterval(() => {
                 width++;
                 bar.style.width = width + "%";
-                if(width < 40) txt.innerText = "Criptografando dados...";
-                else if(width < 80) txt.innerText = "Validando biometria facial...";
-                else txt.innerText = "Finalizando...";
+                if(width < 40) txt.innerText = "Criptografando e verificando metadados...";
+                else if(width < 80) txt.innerText = "Validando nitidez e biometria facial...";
+                else txt.innerText = "Finalizando validação digital...";
 
                 if(width >= 100) {
                     clearInterval(inv);
                     setTimeout(() => {
                         document.getElementById('step-3').classList.add('hidden');
                         document.getElementById('step-4').classList.remove('hidden');
-                        
+
                         // Gera protocolo
                         let rnd = Math.floor(Math.random() * 9000000) + 1000000;
                         document.getElementById('protocolo').innerText = `2025.${rnd}.SENATRAN-DIGITAL`;
-                    }, 1000);
+                    }, 700);
                 }
-            }, 50);
+            }, 40);
         }
 
         function gerarGRU() {
