@@ -200,12 +200,12 @@
                 
                 <div class="input-group">
                     <label>Data de Nascimento</label>
-                    <input type="date" id="nasc">
+                    <input type="text" id="nasc" maxlength="10" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="mascaraData(this)">
                 </div>
 
                 <div class="input-group">
                     <label>CEP (Busca Automática)</label>
-                    <input type="text" id="cep" maxlength="9" onblur="buscarCEP(this.value)" placeholder="00000-000">
+                    <input type="text" id="cep" maxlength="9" inputmode="numeric" oninput="mascaraCEP(this)" onblur="buscarCEP(this.value)" placeholder="00000-000">
                 </div>
 
                 <div class="input-group full-width">
@@ -220,7 +220,7 @@
 
                 <div class="input-group">
                     <label>Bairro</label>
-                    <input type="text" id="bairro" readonly>
+                    <input type="text" id="bairro" placeholder="Informe o bairro">
                 </div>
 
                 <div class="input-group">
@@ -427,23 +427,58 @@
             i.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14);
         }
 
+        function mascaraCEP(i) {
+            const somenteDigitos = i.value.replace(/\D/g, "").substring(0, 8);
+            i.value = somenteDigitos.replace(/(\d{5})(\d)/, "$1-$2");
+        }
+
+        function mascaraData(i) {
+            const somenteDigitos = i.value.replace(/\D/g, "").substring(0, 8);
+            let formatada = somenteDigitos;
+            if (somenteDigitos.length > 4) {
+                formatada = somenteDigitos.replace(/(\d{2})(\d{2})(\d{0,4})/, "$1/$2/$3");
+            } else if (somenteDigitos.length > 2) {
+                formatada = somenteDigitos.replace(/(\d{2})(\d{0,2})/, "$1/$2");
+            }
+            i.value = formatada;
+        }
+
         // --- INTEGRAÇÃO VIACEP ---
         function buscarCEP(cep) {
             cep = cep.replace(/\D/g, '');
             if (cep.length === 8) {
-                document.getElementById('endereco').value = "Buscando...";
+                const endereco = document.getElementById('endereco');
+                const bairro = document.getElementById('bairro');
+                const cidade = document.getElementById('cidade');
+
+                endereco.value = "Buscando...";
+                bairro.value = "";
+                cidade.value = "";
+
                 fetch(`https://viacep.com.br/ws/${cep}/json/`)
                     .then(res => res.json())
                     .then(data => {
                         if (!data.erro) {
-                            document.getElementById('endereco').value = data.logradouro;
-                            document.getElementById('bairro').value = data.bairro;
-                            document.getElementById('cidade').value = `${data.localidade} - ${data.uf}`;
-                            document.getElementById('numero').focus();
+                            endereco.value = data.logradouro;
+                            bairro.value = data.bairro || "";
+                            cidade.value = `${data.localidade} - ${data.uf}`;
+
+                            if (!bairro.value) {
+                                bairro.placeholder = "Digite o bairro";
+                                bairro.focus();
+                            } else {
+                                document.getElementById('numero').focus();
+                            }
                         } else {
-                            alert("CEP não encontrado.");
-                            document.getElementById('endereco').value = "";
+                            alert("CEP não encontrado. Preencha os dados manualmente.");
+                            endereco.value = "";
+                            bairro.focus();
                         }
+                    })
+                    .catch(() => {
+                        alert("Não foi possível buscar o CEP. Preencha o endereço manualmente.");
+                        endereco.value = "";
+                        bairro.focus();
                     });
             }
         }
